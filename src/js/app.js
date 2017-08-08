@@ -2,18 +2,12 @@ var Settings = require('settings');
 var UI = require('ui');
 var ajax = require('ajax');
 var Feature = require('platform/feature');
-var userList = [];
-var itemList = [];
+var messageList = [];
 
-var usercard = new UI.Card({
-  title: 'User',
-  body: 'email',
-  scrollable: true
-});
-
-var itemcard = new UI.Card({
-  title: 'Item',
-  body: 'price',
+var messagecard = new UI.Card({
+  title: 'Message',
+  subtitle: 'from',
+  body: 'body',
   scrollable: true
 });
 
@@ -25,14 +19,12 @@ var menu = new UI.Menu({
   sections: [{
     title: 'Menu',
     items: [{
-      title: 'Users'
-    },{
-      title: 'Items'
+      title: 'Messages'
     }]
   }]
 });
 
-var users = new UI.Menu({
+var messages = new UI.Menu({
   backgroundColor: 'white',
   textColor: 'black',
   highlightBackgroundColor: Feature.color('kelly-green','black'),
@@ -45,83 +37,38 @@ var users = new UI.Menu({
   }]
 });
 
-var items = new UI.Menu({
-  backgroundColor: 'white',
-  textColor: 'black',
-  highlightBackgroundColor: Feature.color('kelly-green','black'),
-  highlightTextColor: 'white',
-  sections: [{
-    title: 'Items',
-    items: [{
-      title: 'Loading...'
-    }]
-  }]
-});
-
 menu.on('select', function(e) {
   switch(e.itemIndex) {
     case 0:
-      getUsers();
-      users.show();
-      break;
-    case 1:
-      getItems();
-      items.show();
+      getMessages();
+      messages.show();
       break;
   }
 });
 
-usercard.on('back', function() {
-  users.show();
+messagecard.on('back', function() {
+  messages.show();
 });
 
-itemcard.on('back', function() {
-  items.show();
-});
-
-users.on('back', function() {
+messages.on('back', function() {
   menu.show();
 });
 
-items.on('back', function() {
-  menu.show();
-});
-
-users.on('select', function(e) {
-  usercard.title(userList[e.itemIndex].title);
-  if(userList[e.itemIndex].banned == 1) {
-    usercard.subtitle("banned");
-  }else{
-    usercard.subtitle("active");
-  }
-  usercard.body("$"+userList[e.itemIndex].bal);
-  usercard.show();
-});
-
-items.on('select', function(e) {
-  itemcard.title(itemList[e.itemIndex].title);
-  itemcard.subtitle(itemList[e.itemIndex].subtitle);
-  itemcard.body(itemList[e.itemIndex].desc);
-  itemcard.show();
+messages.on('select', function(e) {
+  messagecard.title(messageList[e.itemIndex].title);
+  messagecard.subtitle(messageList[e.itemIndex].subtitle);
+  messagecard.body(messageList[e.itemIndex].msg);
+  messagecard.show();
 });
 
 menu.show();
 
-function getUsers() {
-  ajax({ url: 'http://api.ammaron.gq/pebble/users.json', type: 'json' },
+function getMessages() {
+  ajax({ url: 'http://api.ammaron.gq/pebble/messages.php', type: 'json' },
     function(data) {
-      users.section(0,{title: 'Users ('+data.count+')', items: data.users});
-      userList = data.users;
-      Settings.data('user-list', userList);
-    }
-  );
-}
-function getItems() {
-  ajax({ url: 'http://api.ammaron.gq/pebble/items.json', type: 'json' },
-    function(data) {
-      items.section(0,{title: 'Items ('+data.count+')', items: data.items});
-      itemList = data.items;
-      Settings.data('item-list', itemList);
+      messages.section(0,{title: 'Messages ('+data.count+')', items: data.messages});
+      messageList = data.messages;
+      Settings.data('message-list', messageList);
     }
   );
 }

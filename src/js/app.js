@@ -3,6 +3,8 @@ var UI = require('ui');
 var ajax = require('ajax');
 var Feature = require('platform/feature');
 var messageList = [];
+var myusername = "andersmmg";
+var myid = 0;
 
 var messagecard = new UI.Card({
   title: 'Message',
@@ -30,7 +32,7 @@ var messages = new UI.Menu({
   highlightBackgroundColor: Feature.color('kelly-green','black'),
   highlightTextColor: 'white',
   sections: [{
-    title: 'Users',
+    title: 'Messages',
     items: [{
       title: 'Loading...'
     }]
@@ -40,7 +42,7 @@ var messages = new UI.Menu({
 menu.on('select', function(e) {
   switch(e.itemIndex) {
     case 0:
-      getMessages();
+      load();
       messages.show();
       break;
   }
@@ -64,11 +66,20 @@ messages.on('select', function(e) {
 menu.show();
 
 function getMessages() {
-  ajax({ url: 'http://api.ammaron.gq/pebble/messages.php', type: 'json' },
+  ajax({ url: 'http://api.ammaron.gq/pebble/messages.php?id='+myid, type: 'json' },
     function(data) {
       messages.section(0,{title: 'Messages ('+data.count+')', items: data.messages});
       messageList = data.messages;
       Settings.data('message-list', messageList);
+    }
+  );
+}
+function load() {
+  ajax({ url: 'http://api.ammaron.gq/pebble/username-id.php?username='+myusername, type: 'text' },
+    function(data) {
+      myid = data;
+      Settings.data('message-id', myid);
+      getMessages();
     }
   );
 }
